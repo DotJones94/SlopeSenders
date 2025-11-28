@@ -73,7 +73,7 @@
 
 <style scoped>
 .hero-title {
-  font-size: 15vw;
+  font-size: clamp(48px, 15vw, 100px);
   text-transform: uppercase;
   line-height: 1em;
   font-weight: 600;

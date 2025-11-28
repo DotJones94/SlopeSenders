@@ -1,6 +1,6 @@
 <template>
   <section class="px-8 sm:px-12 lg:px-16 py-16 text-white">
-    <div class="max-w-4xl mx-auto space-y-6">
+    <div class="max-w-4xl space-y-6">
       <h3 class="text-2xl font-semibold text-white/90 md:text-3xl">
         Welcome to the season Slope Senders!
       </h3>
