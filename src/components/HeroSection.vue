@@ -1,24 +1,82 @@
 <script setup lang="ts"></script>
 
 <template>
-  <section
-    class="relative flex flex-wrap justify-between gap-8 rounded-[2rem] bg-night-800/90 p-8 text-white shadow-hero ring-1 ring-white/5 lg:p-12 overflow-hidden"
-  >
-    <div class="relative z-10 max-w-2xl space-y-4 px-12 sm:px-24 lg:px-32">
-      <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand-lavender/90">
-        The 2025/2026 season
-      </p>
-      <h1 class="text-4xl font-semibold leading-tight md:text-5xl lg:text-6xl">Slope Senders</h1>
-      <h3 class="text-2xl font-semibold text-white/90">Welcome to the season Slope Senders!</h3>
-      <p class="text-lg leading-relaxed text-copy-soft">
-        I know just going down the slopes is exciting enough, but this season we're adding an extra
-        bit of spice to the mix. Welcome to the games!
-        <br />
-        We have 3 categories to play in: The Metrics, The Bests, and The Predictions. <br />We are
-        starting off on the 29th of November and we will close the season off with an awards
-        ceremony at the Slush Cup in April 2026. <br />*TBD, but someone will be be sliding down
-        that slush cup slope! <br />Good luck out there!
-      </p>
+  <section class="relative h-screen flex items-end justify-start bg-black overflow-hidden">
+    <!-- Gradient mountain behind (glow effect) -->
+    <div
+      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200%] h-[200%] overflow-hidden pointer-events-none z-0"
+      style="clip-path: inset(0 0 calc(50% + 1px) 0)"
+    >
+      <svg
+        viewBox="0 0 1280.000000 640.000000"
+        class="absolute top-1/2 left-1/2 w-[120%] h-[120%]"
+        preserveAspectRatio="xMidYMid meet"
+        style="transform: translate(-50%, -50%) translate(10px, 10px); filter: blur(15px)"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <linearGradient
+            id="mountainGradientGlow"
+            x1="0%"
+            y1="0%"
+            x2="100%"
+            y2="0%"
+            gradientUnits="objectBoundingBox"
+          >
+            <stop offset="0%" stop-color="#ec4899" stop-opacity="1" />
+            <stop offset="50%" stop-color="#6366f1" stop-opacity="1" />
+            <stop offset="100%" stop-color="#8b5cf6" stop-opacity="1" />
+          </linearGradient>
+        </defs>
+        <g transform="translate(0.000000,640.000000) scale(0.100000,-0.100000)" stroke="none">
+          <path
+            d="M5669 6134 c-8 -8 -72 -43 -144 -78 l-130 -64 -260 -233 c-301 -270 -334 -302 -438 -426 -94 -112 -183 -180 -301 -230 -51 -21 -118 -59 -156 -89 -36 -29 -77 -54 -91 -56 -24 -3 -24 -4 -29 -133 -6 -158 9 -131 -251 -438 l-186 -218 -179 -120 c-98 -65 -187 -119 -197 -119 -16 0 -17 -7 -11 -64 6 -55 3 -71 -19 -120 -14 -30 -40 -77 -58 -103 -33 -48 -182 -219 -301 -345 l-63 -67 -122 32 -122 32 -51 -22 c-64 -27 -281 -184 -276 -199 3 -7 -8 -24 -24 -39 l-28 -27 -24 22 c-87 82 -479 200 -667 200 -91 0 -191 -37 -306 -115 -49 -34 -143 -95 -208 -135 -91 -57 -123 -83 -137 -111 -24 -47 -89 -268 -101 -344 -14 -94 -61 -178 -127 -231 -62 -49 -186 -126 -272 -169 -65 -33 -377 -326 -387 -363 -3 -14 0 -29 8 -37 12 -12 195 -114 764 -431 145 -81 170 -99 270 -196 107 -104 112 -107 165 -113 62 -7 454 10 575 25 209 26 380 40 482 40 147 0 219 -19 795 -210 562 -185 496 -176 1124 -161 362 8 481 15 614 33 193 26 497 30 620 10 137 -24 284 -53 340 -69 135 -37 739 -231 974 -313 l259 -90 121 11 c66 5 202 21 301 34 237 32 445 51 750 69 229 14 355 27 424 42 157 36 611 194 1051 367 652 255 817 312 1260 439 l255 72 185 3 c102 2 329 0 505 -4 387 -10 819 -1 889 19 98 27 82 66 -67 153 -150 89 -201 127 -281 209 -99 101 -147 174 -266 404 -95 185 -148 262 -178 262 -10 0 -22 10 -27 23 -11 25 -52 26 -71 1 -9 -11 -13 -9 -23 14 -20 43 -93 142 -261 352 -234 293 -331 425 -325 442 4 10 -64 83 -210 225 l-215 211 -187 85 c-147 66 -190 82 -198 72 -5 -7 -30 -15 -55 -19 -80 -11 -313 -67 -390 -93 -90 -31 -162 -66 -179 -87 -8 -10 -29 -16 -51 -16 -36 0 -42 5 -108 88 -108 135 -192 256 -188 268 13 36 -274 134 -448 153 -94 11 -158 -1 -304 -58 -167 -64 -134 -71 -375 80 -395 248 -383 239 -435 326 -26 43 -64 100 -85 127 -20 27 -37 56 -37 64 0 27 -79 120 -123 146 -65 39 -157 59 -235 52 -37 -3 -81 -6 -98 -7 -80 -2 -267 109 -475 281 -68 57 -320 300 -559 540 -521 523 -576 571 -611 534z"
+            fill="url(#mountainGradientGlow)"
+          />
+        </g>
+      </svg>
+    </div>
+    <!-- Tall dark mountain silhouette centered -->
+    <div
+      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200%] h-[200%] overflow-hidden pointer-events-none z-10"
+      style="clip-path: inset(0 0 50% 0)"
+    >
+      <svg
+        viewBox="0 0 1280.000000 640.000000"
+        class="absolute top-1/2 left-1/2 w-full h-full"
+        preserveAspectRatio="xMidYMid meet"
+        style="transform: translate(-50%, -50%)"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g
+          transform="translate(0.000000,640.000000) scale(0.100000,-0.100000)"
+          fill="#000000"
+          stroke="none"
+        >
+          <path
+            d="M5669 6134 c-8 -8 -72 -43 -144 -78 l-130 -64 -260 -233 c-301 -270 -334 -302 -438 -426 -94 -112 -183 -180 -301 -230 -51 -21 -118 -59 -156 -89 -36 -29 -77 -54 -91 -56 -24 -3 -24 -4 -29 -133 -6 -158 9 -131 -251 -438 l-186 -218 -179 -120 c-98 -65 -187 -119 -197 -119 -16 0 -17 -7 -11 -64 6 -55 3 -71 -19 -120 -14 -30 -40 -77 -58 -103 -33 -48 -182 -219 -301 -345 l-63 -67 -122 32 -122 32 -51 -22 c-64 -27 -281 -184 -276 -199 3 -7 -8 -24 -24 -39 l-28 -27 -24 22 c-87 82 -479 200 -667 200 -91 0 -191 -37 -306 -115 -49 -34 -143 -95 -208 -135 -91 -57 -123 -83 -137 -111 -24 -47 -89 -268 -101 -344 -14 -94 -61 -178 -127 -231 -62 -49 -186 -126 -272 -169 -65 -33 -377 -326 -387 -363 -3 -14 0 -29 8 -37 12 -12 195 -114 764 -431 145 -81 170 -99 270 -196 107 -104 112 -107 165 -113 62 -7 454 10 575 25 209 26 380 40 482 40 147 0 219 -19 795 -210 562 -185 496 -176 1124 -161 362 8 481 15 614 33 193 26 497 30 620 10 137 -24 284 -53 340 -69 135 -37 739 -231 974 -313 l259 -90 121 11 c66 5 202 21 301 34 237 32 445 51 750 69 229 14 355 27 424 42 157 36 611 194 1051 367 652 255 817 312 1260 439 l255 72 185 3 c102 2 329 0 505 -4 387 -10 819 -1 889 19 98 27 82 66 -67 153 -150 89 -201 127 -281 209 -99 101 -147 174 -266 404 -95 185 -148 262 -178 262 -10 0 -22 10 -27 23 -11 25 -52 26 -71 1 -9 -11 -13 -9 -23 14 -20 43 -93 142 -261 352 -234 293 -331 425 -325 442 4 10 -64 83 -210 225 l-215 211 -187 85 c-147 66 -190 82 -198 72 -5 -7 -30 -15 -55 -19 -80 -11 -313 -67 -390 -93 -90 -31 -162 -66 -179 -87 -8 -10 -29 -16 -51 -16 -36 0 -42 5 -108 88 -108 135 -192 256 -188 268 13 36 -274 134 -448 153 -94 11 -158 -1 -304 -58 -167 -64 -134 -71 -375 80 -395 248 -383 239 -435 326 -26 43 -64 100 -85 127 -20 27 -37 56 -37 64 0 27 -79 120 -123 146 -65 39 -157 59 -235 52 -37 -3 -81 -6 -98 -7 -80 -2 -267 109 -475 281 -68 57 -320 300 -559 540 -521 523 -576 571 -611 534z"
+          />
+        </g>
+      </svg>
+    </div>
+    <MountainSilhouette color="#8c85ff" colorDark="#5b55d3" flipped="false" />
+    <div class="relative z-10 p-8 sm:p-12 lg:p-16 mb-[20vh] ml-[30px]">
+      <div class="space-y-2">
+        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand-lavender/90">
+          The 2025/26 season
+        </p>
+        <h1 class="hero-title">Slope Senders</h1>
+      </div>
     </div>
   </section>
 </template>
+
+<style scoped>
+.hero-title {
+  font-size: 15vw;
+  text-transform: uppercase;
+  line-height: 1em;
+  font-weight: 600;
+  color: white;
+}
+</style>

@@ -5,8 +5,8 @@ import type { CategoryWithLoop } from '@/types/categories'
 import MountainSilhouette from './MountainSilhouette.vue'
 
 const mountainColors: { light: string[]; dark: string[] } = {
-  light: ['#8c85ff', '#34d399', '#f59e0b'], // blue, green, orange
-  dark: ['#5b55d3', '#2e7a63', '#a77c2e'], // dark blue, dark green, dark orange
+  light: ['#6366f1', '#8b5cf6', '#ec4899'], // pink, indigo, purple
+  dark: ['#4338ca', '#6d28d9', '#be185d'], // dark pink, dark indigo, dark purple
 }
 
 const props = defineProps<{
