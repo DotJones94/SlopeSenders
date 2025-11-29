@@ -81,7 +81,7 @@ onMounted(() => {
       class="relative pb-8 my-8"
       :style="{
         backgroundColor: `${getCategoryColor(index)}`,
-        backgroundImage: 'linear-gradient(1deg, black, transparent)',
+        backgroundImage: 'linear-gradient(0deg, black 0%, transparent 30%)',
       }"
     >
       <MountainSilhouette

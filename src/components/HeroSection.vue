@@ -23,9 +23,9 @@
             y2="0%"
             gradientUnits="objectBoundingBox"
           >
-            <stop offset="0%" stop-color="#ec4899" stop-opacity="1" />
+            <stop offset="20%" stop-color="#ec4899" stop-opacity="1" />
             <stop offset="50%" stop-color="#6366f1" stop-opacity="1" />
-            <stop offset="100%" stop-color="#8b5cf6" stop-opacity="1" />
+            <stop offset="80%" stop-color="#8b5cf6" stop-opacity="1" />
           </linearGradient>
         </defs>
         <g transform="translate(0.000000,640.000000) scale(0.100000,-0.100000)" stroke="none">
