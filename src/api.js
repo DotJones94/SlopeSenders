@@ -3,22 +3,23 @@ export async function getCategories() {
   return res.json()
 }
 
-export async function getNominees(categoryId) {
-  const res = await fetch(
-    `/.netlify/functions/nominees?categoryId=${encodeURIComponent(categoryId)}`,
-  )
+// ⬇️ UPDATED: use slug
+export async function getNomineesBySlug(slug) {
+  const res = await fetch(`/.netlify/functions/nominees-by-slug?slug=${encodeURIComponent(slug)}`)
   return res.json()
 }
 
-export async function nominate(categoryId, name) {
-  const res = await fetch('/.netlify/functions/nominate', {
+// ⬇️ UPDATED: use slug
+export async function nominateBySlug(slug, name) {
+  const res = await fetch('/.netlify/functions/nominate-by-slug', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ categoryId, name }),
+    body: JSON.stringify({ slug, name }),
   })
   return res.json()
 }
 
+// ✅ stays the same
 export async function vote(nomineeId) {
   const res = await fetch('/.netlify/functions/vote', {
     method: 'POST',
