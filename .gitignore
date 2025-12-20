@@ -1,0 +1,12 @@
+# Local Netlify folder
+.netlify
+.env
+node_modules
+dist
+dist-ssr
+coverage
+.eslintcache
+.prettiercache
+.vscode
+.cursorrules
+.cursorignore

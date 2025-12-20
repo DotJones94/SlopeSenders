@@ -14,6 +14,7 @@ export type Category = {
 
 export type LoopedTile = Tile & {
   loopKey: string
+  slug: string
 }
 
 export type CategoryWithLoop = Category & {

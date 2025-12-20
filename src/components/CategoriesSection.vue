@@ -2,7 +2,10 @@
 import { nextTick, onMounted, ref } from 'vue'
 import type { ComponentPublicInstance } from 'vue'
 import type { CategoryWithLoop } from '@/types/categories'
+import { useRouter } from 'vue-router'
 import MountainSilhouette from './MountainSilhouette.vue'
+
+const router = useRouter()
 
 const mountainColors: { light: string[]; dark: string[] } = {
   light: ['#6366f1', '#8b5cf6', '#ec4899'], // pink, indigo, purple
@@ -114,7 +117,8 @@ onMounted(() => {
           role="listitem"
         >
           <div
-            class="relative min-h-[310px] overflow-visible rounded-[2.2rem] bg-white p-6 shadow-lg"
+            class="relative min-h-[310px] overflow-visible rounded-[2.2rem] bg-white p-6 shadow-lg cursor-pointer hover:shadow-xl transition-shadow"
+            @click="router.push(`/category/${tile.slug}`)"
           >
             <!-- Large faint index number in background -->
             <div class="absolute inset-0 flex items-end justify-end pr-8 pb-8 pointer-events-none">
