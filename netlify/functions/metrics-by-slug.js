@@ -10,8 +10,8 @@ export const handler = async (event) => {
     const pool = getPool()
 
     const catRes = await pool.query(`SELECT id, name, slug FROM categories WHERE slug = $1`, [slug])
-
     const category = catRes.rows[0]
+
     if (!category) {
       return { statusCode: 404, body: JSON.stringify({ error: 'category not found' }) }
     }
@@ -19,19 +19,16 @@ export const handler = async (event) => {
     const { rows } = await pool.query(
       `
       SELECT
-        n.id,
-        n.nominee_user_id AS "nomineeUserId",
-        nominee.name AS "nomineeName",
-        n.nominated_by_user_id AS "nominatedByUserId",
-        nominator.name AS "nominatedByName",
-        COUNT(v.id)::int AS votes
-      FROM nominees n
-      JOIN users nominee ON nominee.id = n.nominee_user_id
-      LEFT JOIN users nominator ON nominator.id = n.nominated_by_user_id
-      LEFT JOIN votes v ON v.nominee_id = n.id
-      WHERE n.category_id = $1
-      GROUP BY n.id, nominee.name, nominator.name
-      ORDER BY votes DESC, nominee.name ASC
+        COALESCE(me.id, -u.id) AS id,
+        u.id AS "userId",
+        u.name AS "userName",
+        COALESCE(me.value, 0)::float AS value,
+        me.updated_at AS "updatedAt"
+      FROM users u
+      LEFT JOIN metric_entries me
+        ON me.user_id = u.id
+       AND me.category_id = $1
+      ORDER BY COALESCE(me.value, 0) DESC, me.updated_at ASC NULLS LAST, u.name ASC
       `,
       [category.id],
     )
@@ -39,7 +36,7 @@ export const handler = async (event) => {
     return {
       statusCode: 200,
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ category, nominees: rows }),
+      body: JSON.stringify({ category, entries: rows }),
     }
   } catch (err) {
     return { statusCode: 500, body: JSON.stringify({ error: err.message }) }

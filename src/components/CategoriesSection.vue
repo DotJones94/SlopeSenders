@@ -81,6 +81,7 @@ onMounted(() => {
     <div
       v-for="(category, index) in categories"
       :key="category.id"
+      :id="category.id"
       class="relative pb-8 my-8"
       :style="{
         backgroundColor: `${getCategoryColor(index)}`,

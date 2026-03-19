@@ -1,39 +1,54 @@
 import { getPool } from './_db.js'
-import crypto from 'crypto'
-
-function getVoterHash(event) {
-  // Simple approach: hash IP + user-agent (good enough for now; not perfect)
-  const ip =
-    event.headers['x-nf-client-connection-ip'] || event.headers['x-forwarded-for'] || 'unknown'
-  const ua = event.headers['user-agent'] || 'unknown'
-  return crypto.createHash('sha256').update(`${ip}|${ua}`).digest('hex')
-}
 
 export const handler = async (event) => {
   try {
     if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method Not Allowed' }
 
-    const { nomineeId } = JSON.parse(event.body || '{}')
-    if (!nomineeId)
-      return { statusCode: 400, body: JSON.stringify({ error: 'nomineeId required' }) }
+    const { nomineeId, voterUserId } = JSON.parse(event.body || '{}')
+    if (!nomineeId || !voterUserId) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: 'nomineeId and voterUserId required' }),
+      }
+    }
 
-    const voterHash = getVoterHash(event)
     const pool = getPool()
-
-    // Insert vote; if already voted for this nominee, ignore
-    await pool.query(
+    const nomineeRes = await pool.query(
       `
-      INSERT INTO votes (nominee_id, voter_hash)
-      VALUES ($1, $2)
-      ON CONFLICT (nominee_id, voter_hash) DO NOTHING
+      SELECT id, nominee_user_id AS "nomineeUserId"
+      FROM nominees
+      WHERE id = $1
       `,
-      [nomineeId, voterHash],
+      [nomineeId],
+    )
+    const nominee = nomineeRes.rows[0]
+    if (!nominee) {
+      return { statusCode: 404, body: JSON.stringify({ error: 'nominee not found' }) }
+    }
+
+    const voterRes = await pool.query(`SELECT id FROM users WHERE id = $1`, [voterUserId])
+    if (!voterRes.rows[0]) {
+      return { statusCode: 404, body: JSON.stringify({ error: 'voter not found' }) }
+    }
+
+    if (Number(nominee.nomineeUserId) === Number(voterUserId)) {
+      return { statusCode: 400, body: JSON.stringify({ error: 'You cannot vote for yourself.' }) }
+    }
+
+    const result = await pool.query(
+      `
+      INSERT INTO votes (nominee_id, voter_user_id, voter_hash)
+      VALUES ($1, $2, $3)
+      ON CONFLICT (nominee_id, voter_user_id) DO NOTHING
+      RETURNING id
+      `,
+      [nomineeId, voterUserId, `user:${voterUserId}`],
     )
 
     return {
       statusCode: 200,
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ ok: true }),
+      body: JSON.stringify({ ok: true, duplicate: result.rowCount === 0 }),
     }
   } catch (err) {
     return { statusCode: 500, body: JSON.stringify({ error: err.message }) }
