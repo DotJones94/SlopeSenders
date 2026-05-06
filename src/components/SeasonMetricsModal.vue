@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { getMetricsBySlug, upsertMetricBySlug, type MetricPayload } from '@/api'
+import { useBodyScrollLock } from '@/composables/useBodyScrollLock'
 import { useSessionUserStore } from '@/stores/sessionUser'
 import { getMetricCategories, sanitizeMetricInput } from '@/utils/metrics'
 
@@ -41,6 +42,8 @@ const showModal = computed(
     hasIncompleteMetrics.value &&
     categories.value.length > 0,
 )
+
+useBodyScrollLock(showModal)
 
 function getCurrentUserMetricValue(payload: MetricPayload, userId: number) {
   return payload.entries.find((entry) => entry.userId === userId) ?? null
@@ -206,10 +209,10 @@ watch(
   <Teleport to="body">
     <div
       v-if="showModal"
-      class="fixed inset-0 z-[60] flex items-end justify-center bg-slate-950/85 px-3 py-3 backdrop-blur-sm sm:items-center sm:px-4 sm:py-6"
+      class="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/85 px-3 py-3 backdrop-blur-sm sm:px-4 sm:py-6"
     >
       <div
-        class="flex max-h-[92vh] w-full max-w-xl flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900 shadow-2xl shadow-black/40"
+        class="flex max-h-[80vh] w-full max-w-xl flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900 shadow-2xl shadow-black/40"
       >
         <div class="border-b border-white/10 px-5 pb-4 pt-5 sm:px-6 sm:pb-5 sm:pt-6">
           <p class="text-xs uppercase tracking-[0.24em] text-cyan-300 sm:text-sm">Slope Senders</p>

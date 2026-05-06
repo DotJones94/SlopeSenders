@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
+import { useBodyScrollLock } from '@/composables/useBodyScrollLock'
 import { useSessionUserStore } from '@/stores/sessionUser'
 import { getProfilePicUrl } from '@/utils/profilePics'
 
 const sessionUser = useSessionUserStore()
 
 const showModal = computed(() => sessionUser.loaded && !sessionUser.currentUser)
+
+useBodyScrollLock(showModal)
 
 onMounted(() => {
   sessionUser.loadUsers()
@@ -16,10 +19,10 @@ onMounted(() => {
   <Teleport to="body">
     <div
       v-if="showModal"
-      class="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/80 px-3 py-3 backdrop-blur-sm sm:items-center sm:px-4 sm:py-6"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 px-3 py-3 backdrop-blur-sm sm:px-4 sm:py-6"
     >
       <div
-        class="flex max-h-[92vh] w-full max-w-md flex-col overflow-hidden rounded-3xl border border-white/10 bg-slate-900 shadow-2xl shadow-black/40"
+        class="flex max-h-[80vh] w-full max-w-md flex-col overflow-hidden rounded-3xl border border-white/10 bg-slate-900 shadow-2xl shadow-black/40"
       >
         <div class="border-b border-white/10 px-5 pb-4 pt-5 sm:px-6 sm:pb-5 sm:pt-6">
           <p class="text-sm uppercase tracking-[0.24em] text-cyan-300">Slope Senders</p>
