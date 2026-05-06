@@ -4,15 +4,18 @@ import CategoriesSection from '@/components/CategoriesSection.vue'
 import CtaBlock from '@/components/CtaBlock.vue'
 import { loopMultiplier } from '@/data/categories'
 import GameDescription from '@/components/GameDescription.vue'
+import { getMockCategoryMap } from '@/mockApi'
 
 import { ref, onMounted } from 'vue'
 import { categories as staticCategories } from '@/data/categories'
 
 const categories = ref(staticCategories)
+const useFakeData = import.meta.env.VITE_USE_FAKE_DATA === 'true'
 
 onMounted(async () => {
-  const res = await fetch('/.netlify/functions/category-map')
-  const map = await res.json() // { "bests-dressed": 12, ... }
+  const map = useFakeData
+    ? getMockCategoryMap()
+    : await fetch('/.netlify/functions/category-map').then((res) => res.json())
 
   // attach db ids to tiles
   categories.value = categories.value.map((section) => ({

@@ -36,6 +36,18 @@ export interface MetricPayload {
   entries: MetricEntry[]
 }
 
+import {
+  getMockCategories,
+  getMockMetricsBySlug,
+  getMockNomineesBySlug,
+  getMockUsers,
+  nominateMockBySlug,
+  upsertMockMetricBySlug,
+  voteMock,
+} from '@/mockApi'
+
+const USE_FAKE_DATA = import.meta.env.VITE_USE_FAKE_DATA === 'true'
+
 async function request<T>(input: string, init?: RequestInit): Promise<T> {
   const res = await fetch(input, init)
   const text = await res.text()
@@ -61,18 +73,34 @@ async function request<T>(input: string, init?: RequestInit): Promise<T> {
 }
 
 export async function getCategories(): Promise<Category[]> {
+  if (USE_FAKE_DATA) {
+    return getMockCategories()
+  }
+
   return request('/.netlify/functions/categories')
 }
 
 export async function getUsers(): Promise<User[]> {
+  if (USE_FAKE_DATA) {
+    return getMockUsers()
+  }
+
   return request('/.netlify/functions/users')
 }
 
 export async function getNomineesBySlug(slug: string): Promise<CategoryPayload> {
+  if (USE_FAKE_DATA) {
+    return getMockNomineesBySlug(slug)
+  }
+
   return request(`/.netlify/functions/nominees-by-slug?slug=${encodeURIComponent(slug)}`)
 }
 
 export async function getMetricsBySlug(slug: string): Promise<MetricPayload> {
+  if (USE_FAKE_DATA) {
+    return getMockMetricsBySlug(slug)
+  }
+
   return request(`/.netlify/functions/metrics-by-slug?slug=${encodeURIComponent(slug)}`)
 }
 
@@ -81,6 +109,10 @@ export async function nominateBySlug(
   nomineeUserId: number,
   nominatedByUserId: number,
 ): Promise<{ id: number }> {
+  if (USE_FAKE_DATA) {
+    return nominateMockBySlug(slug, nomineeUserId, nominatedByUserId)
+  }
+
   return request('/.netlify/functions/nominate-by-slug', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
@@ -92,6 +124,10 @@ export async function vote(
   nomineeId: number,
   voterUserId: number,
 ): Promise<{ ok: boolean; duplicate?: boolean }> {
+  if (USE_FAKE_DATA) {
+    return voteMock(nomineeId, voterUserId)
+  }
+
   return request('/.netlify/functions/vote', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
@@ -104,6 +140,10 @@ export async function upsertMetricBySlug(
   userId: number,
   value: number,
 ): Promise<{ id: number; value: number; updatedAt: string }> {
+  if (USE_FAKE_DATA) {
+    return upsertMockMetricBySlug(slug, userId, value)
+  }
+
   return request('/.netlify/functions/upsert-metric-by-slug', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
