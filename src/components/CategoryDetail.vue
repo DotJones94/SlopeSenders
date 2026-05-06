@@ -11,7 +11,12 @@ import {
 import type { MetricEntry, MetricPayload } from '@/api'
 import { baseCategories } from '@/data/categories'
 import { useSessionUserStore } from '@/stores/sessionUser'
-import { getCategorySlug, getMetricUnitLabel, sanitizeMetricInput } from '@/utils/metrics'
+import {
+  dispatchMetricsUpdatedEvent,
+  getCategorySlug,
+  getMetricUnitLabel,
+  sanitizeMetricInput,
+} from '@/utils/metrics'
 import { getProfilePicUrl } from '@/utils/profilePics'
 
 const route = useRoute()
@@ -75,7 +80,9 @@ const availableNomineeUsers = computed(() =>
 
 const currentUserMetricEntry = computed(() => {
   if (!sessionUser.currentUserId) return null
-  return metricData.value?.entries.find((entry) => entry.userId === sessionUser.currentUserId) ?? null
+  return (
+    metricData.value?.entries.find((entry) => entry.userId === sessionUser.currentUserId) ?? null
+  )
 })
 
 const metricUnitLabel = computed(() => {
@@ -134,7 +141,9 @@ async function load() {
       }
 
       metricData.value = data
-      metricValue.value = currentUserMetricEntry.value ? String(currentUserMetricEntry.value.value) : ''
+      metricValue.value = currentUserMetricEntry.value
+        ? String(currentUserMetricEntry.value.value)
+        : ''
     } else {
       const data = await getNomineesBySlug(slug.value)
 
@@ -165,6 +174,7 @@ async function submitMetric() {
 
   try {
     await upsertMetricBySlug(slug.value, sessionUser.currentUserId, parsedValue)
+    dispatchMetricsUpdatedEvent()
     successMessage.value = 'Your stat has been updated.'
     await load()
   } catch (err) {
@@ -200,7 +210,9 @@ async function castVote(nomineeId: number) {
 
   try {
     const result = await vote(nomineeId, sessionUser.currentUserId)
-    successMessage.value = result.duplicate ? 'You already voted for this nominee.' : 'Vote counted.'
+    successMessage.value = result.duplicate
+      ? 'You already voted for this nominee.'
+      : 'Vote counted.'
     await load()
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Failed to vote'
@@ -220,7 +232,9 @@ watch(
   () => {
     if (
       selectedNomineeUserId.value &&
-      categoryData.value?.nominees.some((nominee) => nominee.nomineeUserId === selectedNomineeUserId.value)
+      categoryData.value?.nominees.some(
+        (nominee) => nominee.nomineeUserId === selectedNomineeUserId.value,
+      )
     ) {
       selectedNomineeUserId.value = null
     }
@@ -258,7 +272,9 @@ function openProfilePopup(name: string) {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.22),_transparent_30%),linear-gradient(180deg,_#f8fafc_0%,_#eef2ff_45%,_#ffffff_100%)]">
+  <div
+    class="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.22),_transparent_30%),linear-gradient(180deg,_#f8fafc_0%,_#eef2ff_45%,_#ffffff_100%)]"
+  >
     <div class="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
       <button
         @click="router.push({ path: '/', hash: `#${tile?.category?.id ?? ''}` })"
@@ -282,9 +298,15 @@ function openProfilePopup(name: string) {
       </button>
 
       <div class="mb-8 grid gap-6 lg:grid-cols-[minmax(0,1fr),320px]">
-        <div class="relative overflow-hidden rounded-[2rem] bg-slate-950 px-6 pb-6 pt-8 text-white shadow-[0_24px_80px_rgba(15,23,42,0.28)] sm:px-8">
-          <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.26),_transparent_28%),radial-gradient(circle_at_bottom_left,_rgba(129,140,248,0.28),_transparent_32%)]"></div>
-          <div class="relative z-10 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+        <div
+          class="relative overflow-hidden rounded-[2rem] bg-slate-950 px-6 pb-6 pt-8 text-white shadow-[0_24px_80px_rgba(15,23,42,0.28)] sm:px-8"
+        >
+          <div
+            class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.26),_transparent_28%),radial-gradient(circle_at_bottom_left,_rgba(129,140,248,0.28),_transparent_32%)]"
+          ></div>
+          <div
+            class="relative z-10 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between"
+          >
             <div class="max-w-2xl">
               <p class="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-300">
                 {{ tile?.category?.title }}
@@ -311,8 +333,12 @@ function openProfilePopup(name: string) {
           </div>
         </div>
 
-        <div class="rounded-[1.75rem] border border-white/60 bg-white/90 p-5 shadow-[0_20px_60px_rgba(148,163,184,0.18)] backdrop-blur">
-          <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">Current rider</p>
+        <div
+          class="rounded-[1.75rem] border border-white/60 bg-white/90 p-5 shadow-[0_20px_60px_rgba(148,163,184,0.18)] backdrop-blur"
+        >
+          <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
+            Current rider
+          </p>
           <div class="mt-3 flex items-center gap-4 rounded-2xl bg-slate-950 px-4 py-4 text-white">
             <button
               type="button"
@@ -367,7 +393,10 @@ function openProfilePopup(name: string) {
         <p class="text-red-800">{{ error }}</p>
       </div>
 
-      <div v-if="successMessage" class="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+      <div
+        v-if="successMessage"
+        class="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4"
+      >
         <p class="text-emerald-800">{{ successMessage }}</p>
       </div>
 
@@ -383,7 +412,8 @@ function openProfilePopup(name: string) {
             </p>
           </div>
           <p v-if="currentUserMetricEntry" class="text-sm font-medium text-slate-500">
-            Current total: {{ formatMetricValue(currentUserMetricEntry.value) }} {{ metricUnitLabel }}
+            Current total: {{ formatMetricValue(currentUserMetricEntry.value) }}
+            {{ metricUnitLabel }}
           </p>
         </div>
 
@@ -443,7 +473,8 @@ function openProfilePopup(name: string) {
         </form>
 
         <p class="mt-3 text-xs text-slate-500">
-          You can nominate yourself or someone else, but each rider can only appear once per category.
+          You can nominate yourself or someone else, but each rider can only appear once per
+          category.
         </p>
       </div>
 
@@ -451,7 +482,9 @@ function openProfilePopup(name: string) {
         v-if="!loading && isMetricsCategory && metricData"
         class="overflow-hidden rounded-[2rem] border border-white/60 bg-white/95 shadow-[0_20px_60px_rgba(148,163,184,0.18)]"
       >
-        <div class="hidden grid-cols-[120px,minmax(0,1.5fr),180px] gap-4 border-b border-slate-200 bg-slate-50 px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 md:grid">
+        <div
+          class="hidden grid-cols-[120px,minmax(0,1.5fr),180px] gap-4 border-b border-slate-200 bg-slate-50 px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 md:grid"
+        >
           <div></div>
           <div>Rider</div>
           <div class="text-center">Reported</div>
@@ -463,12 +496,20 @@ function openProfilePopup(name: string) {
           class="border-b border-slate-200 last:border-b-0"
           :class="entry.userId === sessionUser.currentUserId ? 'bg-cyan-50/80' : ''"
         >
-          <div class="hidden items-center gap-4 px-6 py-5 md:grid md:grid-cols-[120px,minmax(0,1.5fr),180px]">
+          <div
+            class="hidden items-center gap-4 px-6 py-5 md:grid md:grid-cols-[120px,minmax(0,1.5fr),180px]"
+          >
             <div class="relative flex items-center gap-3">
-              <div class="absolute -left-2 top-1/2 -translate-y-1/2 text-[72px] font-black leading-none text-slate-200">
+              <div
+                class="absolute -left-2 top-1/2 -translate-y-1/2 text-[72px] font-black leading-none text-slate-200"
+              >
                 {{ index + 1 }}
               </div>
-              <button type="button" class="relative z-10 ml-8 rounded-2xl focus:outline-none focus:ring-2 focus:ring-cyan-300/70" @click="openProfilePopup(entry.userName)">
+              <button
+                type="button"
+                class="relative z-10 ml-8 rounded-2xl focus:outline-none focus:ring-2 focus:ring-cyan-300/70"
+                @click="openProfilePopup(entry.userName)"
+              >
                 <img
                   :src="getProfilePicUrl(entry.userName)"
                   :alt="entry.userName"
@@ -482,7 +523,9 @@ function openProfilePopup(name: string) {
             </div>
 
             <div class="text-center">
-              <span class="inline-flex min-w-24 items-baseline justify-center gap-2 rounded-2xl bg-slate-100 px-4 py-3 text-slate-900">
+              <span
+                class="inline-flex min-w-24 items-baseline justify-center gap-2 rounded-2xl bg-slate-100 px-4 py-3 text-slate-900"
+              >
                 <span class="text-lg font-bold">{{ formatMetricValue(entry.value) }}</span>
                 <span class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                   {{ metricUnitLabel }}
@@ -494,11 +537,17 @@ function openProfilePopup(name: string) {
           <div class="space-y-4 px-4 py-5 sm:px-5 md:hidden">
             <div class="flex items-start gap-4">
               <div class="relative flex w-14 shrink-0 justify-center">
-                <div class="absolute left-0 top-1/2 -translate-y-1/2 text-[56px] font-black leading-none text-slate-200">
+                <div
+                  class="absolute left-0 top-1/2 -translate-y-1/2 text-[56px] font-black leading-none text-slate-200"
+                >
                   {{ index + 1 }}
                 </div>
               </div>
-              <button type="button" class="shrink-0 rounded-2xl focus:outline-none focus:ring-2 focus:ring-cyan-300/70" @click="openProfilePopup(entry.userName)">
+              <button
+                type="button"
+                class="shrink-0 rounded-2xl focus:outline-none focus:ring-2 focus:ring-cyan-300/70"
+                @click="openProfilePopup(entry.userName)"
+              >
                 <img
                   :src="getProfilePicUrl(entry.userName)"
                   :alt="entry.userName"
@@ -535,7 +584,9 @@ function openProfilePopup(name: string) {
         v-else-if="!loading && categoryData"
         class="overflow-hidden rounded-[2rem] border border-white/60 bg-white/95 shadow-[0_20px_60px_rgba(148,163,184,0.18)]"
       >
-        <div class="hidden grid-cols-[84px,minmax(0,1.5fr),minmax(0,1fr),120px,140px] gap-4 border-b border-slate-200 bg-slate-50 px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 md:grid">
+        <div
+          class="hidden grid-cols-[84px,minmax(0,1.5fr),minmax(0,1fr),120px,140px] gap-4 border-b border-slate-200 bg-slate-50 px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 md:grid"
+        >
           <div>Rank</div>
           <div>Nominee</div>
           <div>Nominated By</div>
@@ -548,13 +599,21 @@ function openProfilePopup(name: string) {
           :key="nominee.id"
           class="border-b border-slate-200 last:border-b-0"
         >
-          <div class="hidden items-center gap-4 px-6 py-5 md:grid md:grid-cols-[84px,minmax(0,1.5fr),minmax(0,1fr),120px,140px]">
+          <div
+            class="hidden items-center gap-4 px-6 py-5 md:grid md:grid-cols-[84px,minmax(0,1.5fr),minmax(0,1fr),120px,140px]"
+          >
             <div class="flex items-center gap-3">
-              <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-950 text-lg font-bold text-white">
+              <div
+                class="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-950 text-lg font-bold text-white"
+              >
                 {{ index + 1 }}
               </div>
               <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100">
-                <button type="button" class="rounded-2xl focus:outline-none focus:ring-2 focus:ring-cyan-300/70" @click="openProfilePopup(nominee.nomineeName)">
+                <button
+                  type="button"
+                  class="rounded-2xl focus:outline-none focus:ring-2 focus:ring-cyan-300/70"
+                  @click="openProfilePopup(nominee.nomineeName)"
+                >
                   <img
                     :src="getProfilePicUrl(nominee.nomineeName)"
                     :alt="nominee.nomineeName"
@@ -582,7 +641,9 @@ function openProfilePopup(name: string) {
             </div>
 
             <div class="text-center">
-              <span class="inline-flex min-w-16 items-center justify-center rounded-2xl bg-slate-100 px-4 py-3 text-lg font-bold text-slate-900">
+              <span
+                class="inline-flex min-w-16 items-center justify-center rounded-2xl bg-slate-100 px-4 py-3 text-lg font-bold text-slate-900"
+              >
                 {{ nominee.votes }}
               </span>
             </div>
@@ -596,7 +657,9 @@ function openProfilePopup(name: string) {
                     : 'bg-slate-950 text-white hover:bg-slate-800'
                 "
                 @click="castVote(nominee.id)"
-                :disabled="votingId === nominee.id || nominee.nomineeUserId === sessionUser.currentUserId"
+                :disabled="
+                  votingId === nominee.id || nominee.nomineeUserId === sessionUser.currentUserId
+                "
               >
                 {{ voteLabel(nominee) }}
               </button>
@@ -605,11 +668,19 @@ function openProfilePopup(name: string) {
 
           <div class="space-y-4 px-4 py-5 sm:px-5 md:hidden">
             <div class="flex items-start gap-4">
-              <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-lg font-bold text-white">
+              <div
+                class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-lg font-bold text-white"
+              >
                 {{ index + 1 }}
               </div>
-              <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-slate-100">
-                <button type="button" class="rounded-2xl focus:outline-none focus:ring-2 focus:ring-cyan-300/70" @click="openProfilePopup(nominee.nomineeName)">
+              <div
+                class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-slate-100"
+              >
+                <button
+                  type="button"
+                  class="rounded-2xl focus:outline-none focus:ring-2 focus:ring-cyan-300/70"
+                  @click="openProfilePopup(nominee.nomineeName)"
+                >
                   <img
                     :src="getProfilePicUrl(nominee.nomineeName)"
                     :alt="nominee.nomineeName"
@@ -656,14 +727,19 @@ function openProfilePopup(name: string) {
                   : 'bg-slate-950 text-white hover:bg-slate-800'
               "
               @click="castVote(nominee.id)"
-              :disabled="votingId === nominee.id || nominee.nomineeUserId === sessionUser.currentUserId"
+              :disabled="
+                votingId === nominee.id || nominee.nomineeUserId === sessionUser.currentUserId
+              "
             >
               {{ voteLabel(nominee) }}
             </button>
           </div>
         </article>
 
-        <div v-if="categoryData.nominees.length === 0" class="p-10 text-center text-sm text-slate-500">
+        <div
+          v-if="categoryData.nominees.length === 0"
+          class="p-10 text-center text-sm text-slate-500"
+        >
           No nominees yet. Be the first to nominate someone.
         </div>
       </div>

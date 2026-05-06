@@ -1,5 +1,7 @@
 import { baseCategories } from '@/data/categories'
 
+export const METRICS_UPDATED_EVENT = 'slopesenders:metrics-updated'
+
 export function slugifyMetricValue(str: string) {
   return str
     .toLowerCase()
@@ -48,4 +50,9 @@ export function sanitizeMetricInput(rawValue: string) {
   }
 
   return `${wholePart}.${decimalParts.join('')}`
+}
+
+export function dispatchMetricsUpdatedEvent() {
+  if (typeof window === 'undefined') return
+  window.dispatchEvent(new CustomEvent(METRICS_UPDATED_EVENT))
 }

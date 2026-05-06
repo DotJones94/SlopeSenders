@@ -3,7 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { getMetricsBySlug, upsertMetricBySlug, type MetricPayload } from '@/api'
 import { useBodyScrollLock } from '@/composables/useBodyScrollLock'
 import { useSessionUserStore } from '@/stores/sessionUser'
-import { getMetricCategories, sanitizeMetricInput } from '@/utils/metrics'
+import { dispatchMetricsUpdatedEvent, getMetricCategories, sanitizeMetricInput } from '@/utils/metrics'
 
 type MetricCategoryState = {
   title: string
@@ -175,6 +175,7 @@ async function submitAllMetrics() {
       ),
     )
 
+    dispatchMetricsUpdatedEvent()
     await loadCategoriesForUser(sessionUser.currentUserId)
   } catch (err) {
     submitError.value = err instanceof Error ? err.message : 'Failed to save your season data'
