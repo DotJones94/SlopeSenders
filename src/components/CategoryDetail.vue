@@ -11,6 +11,7 @@ import {
 import type { MetricEntry, MetricPayload } from '@/api'
 import { baseCategories } from '@/data/categories'
 import { useSessionUserStore } from '@/stores/sessionUser'
+import { getCategorySlug, getMetricUnitLabel, sanitizeMetricInput } from '@/utils/metrics'
 import { getProfilePicUrl } from '@/utils/profilePics'
 
 const route = useRoute()
@@ -53,18 +54,10 @@ const getImageUrl = (imageName?: string): string | undefined => {
   return new URL(`../assets/images/${imageName}`, import.meta.url).href
 }
 
-const slugify = (str: string) =>
-  str
-    .toLowerCase()
-    .trim()
-    .replace(/['"]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '')
-
 const tile = computed(() => {
   for (const category of baseCategories) {
     const foundTile = category.tiles.find((t) => {
-      const expectedSlug = `${slugify(category.id)}-${slugify(t.title)}`
+      const expectedSlug = getCategorySlug(category.id, t.title)
       return expectedSlug === slug.value
     })
     if (foundTile) return { ...foundTile, category }
@@ -86,13 +79,7 @@ const currentUserMetricEntry = computed(() => {
 })
 
 const metricUnitLabel = computed(() => {
-  const title = tile.value?.title.toLowerCase() ?? ''
-  if (title.includes('days')) return 'days'
-  if (title.includes('runs')) return 'runs'
-  if (title.includes('vertical')) return 'vertical meters'
-  if (title.includes('resorts')) return 'resorts'
-  if (title.includes('speed')) return 'km/h'
-  return 'total'
+  return getMetricUnitLabel(tile.value?.title ?? '')
 })
 
 const canSubmitMetric = computed(() => {
@@ -117,6 +104,13 @@ function formatMetricValue(value: number) {
 function resetFlashMessages() {
   error.value = null
   successMessage.value = null
+}
+
+function handleMetricInput(event: Event) {
+  const target = event.target as HTMLInputElement
+  const sanitizedValue = sanitizeMetricInput(target.value)
+  metricValue.value = sanitizedValue
+  target.value = sanitizedValue
 }
 
 async function load() {
@@ -400,6 +394,7 @@ function openProfilePopup(name: string) {
             min="0"
             step="0.01"
             inputmode="decimal"
+            @input="handleMetricInput"
             :placeholder="`Enter your ${metricUnitLabel}`"
             class="min-h-12 flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
             :disabled="submitting || !sessionUser.currentUserId"

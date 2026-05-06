@@ -11,31 +11,33 @@ export const baseCategories: Category[] = [
       {
         header: 'The most',
         title: 'Vertical Meters',
-        description: 'Overall vertical meters through the season',
+        description: 'How far you went up and down, up and down, up and down, up and down... ',
         image: 'ruler.png',
       },
       {
         header: 'The most',
         title: 'Overall Runs',
-        description: 'Overall number of runs through the season',
+        description:
+          'Give a guess, no one is going to fight you on this one, on average we do like 9 runs a day',
         image: 'tired-skier.png',
       },
       {
         header: 'The most',
         title: 'Days on the Slopes',
-        description: 'Overall days on the slopes through the season',
+        description: 'People will fight you on this one, we will be looking for read receipts',
         image: 'calendar.png',
       },
       {
         header: 'The most',
         title: 'Different Resorts',
-        description: 'Have the most different resorts through the season',
+        description: 'How many different mountains you flew down this season you legend',
         image: 'globe.png',
       },
       {
         header: 'The fastest',
         title: 'Top Speed',
-        description: 'The fastest km/h on a single run. Needs to be from top to bottom.',
+        description:
+          'The fastest km/h. Whooooosh, you speed demon, thank goodness patrol was not there',
         image: 'rocket.png',
       },
     ],
