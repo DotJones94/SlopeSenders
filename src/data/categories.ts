@@ -28,12 +28,6 @@ export const baseCategories: Category[] = [
       },
       {
         header: 'The most',
-        title: 'Diverse Runs',
-        description: 'Have the most greens, blues, and blacks through the season',
-        image: 'run-mountain.png',
-      },
-      {
-        header: 'The most',
         title: 'Different Resorts',
         description: 'Have the most different resorts through the season',
         image: 'globe.png',

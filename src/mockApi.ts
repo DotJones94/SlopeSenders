@@ -87,9 +87,8 @@ function getInitialMockDb(): MockDb {
       { id: 4, categoryId: getCategoryId('metrics-overall-runs'), userId: 8, value: 118, updatedAt: isoDate(-3) },
       { id: 5, categoryId: getCategoryId('metrics-days-on-the-slopes'), userId: 5, value: 19, updatedAt: isoDate(-7) },
       { id: 6, categoryId: getCategoryId('metrics-days-on-the-slopes'), userId: 2, value: 17, updatedAt: isoDate(-2) },
-      { id: 7, categoryId: getCategoryId('metrics-diverse-runs'), userId: 4, value: 34, updatedAt: isoDate(-5) },
-      { id: 8, categoryId: getCategoryId('metrics-different-resorts'), userId: 7, value: 6, updatedAt: isoDate(-9) },
-      { id: 9, categoryId: getCategoryId('metrics-top-speed'), userId: 1, value: 78.5, updatedAt: isoDate(-1) },
+      { id: 7, categoryId: getCategoryId('metrics-different-resorts'), userId: 7, value: 6, updatedAt: isoDate(-9) },
+      { id: 8, categoryId: getCategoryId('metrics-top-speed'), userId: 1, value: 78.5, updatedAt: isoDate(-1) },
     ],
   }
 }
