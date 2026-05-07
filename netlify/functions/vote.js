@@ -15,7 +15,7 @@ export const handler = async (event) => {
     const pool = getPool()
     const nomineeRes = await pool.query(
       `
-      SELECT id, nominee_user_id AS "nomineeUserId"
+      SELECT id, category_id AS "categoryId", nominee_user_id AS "nomineeUserId"
       FROM nominees
       WHERE id = $1
       `,
@@ -33,6 +33,26 @@ export const handler = async (event) => {
 
     if (Number(nominee.nomineeUserId) === Number(voterUserId)) {
       return { statusCode: 400, body: JSON.stringify({ error: 'You cannot vote for yourself.' }) }
+    }
+
+    const existingVoteRes = await pool.query(
+      `
+      SELECT v.id
+      FROM votes v
+      JOIN nominees n ON n.id = v.nominee_id
+      WHERE v.voter_user_id = $1
+        AND n.category_id = $2
+      LIMIT 1
+      `,
+      [voterUserId, nominee.categoryId],
+    )
+
+    if (existingVoteRes.rows[0]) {
+      return {
+        statusCode: 200,
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ ok: true, duplicate: true }),
+      }
     }
 
     const result = await pool.query(

@@ -3,6 +3,7 @@ import { getPool } from './_db.js'
 export const handler = async (event) => {
   try {
     const slug = event.queryStringParameters?.slug
+    const voterUserId = Number(event.queryStringParameters?.voterUserId)
     if (!slug) {
       return { statusCode: 400, body: JSON.stringify({ error: 'slug required' }) }
     }
@@ -36,10 +37,28 @@ export const handler = async (event) => {
       [category.id],
     )
 
+    let currentUserVoteNomineeId = null
+
+    if (Number.isFinite(voterUserId) && voterUserId > 0) {
+      const voteRes = await pool.query(
+        `
+        SELECT v.nominee_id AS "nomineeId"
+        FROM votes v
+        JOIN nominees n ON n.id = v.nominee_id
+        WHERE v.voter_user_id = $1
+          AND n.category_id = $2
+        LIMIT 1
+        `,
+        [voterUserId, category.id],
+      )
+
+      currentUserVoteNomineeId = voteRes.rows[0]?.nomineeId ?? null
+    }
+
     return {
       statusCode: 200,
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ category, nominees: rows }),
+      body: JSON.stringify({ category, nominees: rows, currentUserVoteNomineeId }),
     }
   } catch (err) {
     return { statusCode: 500, body: JSON.stringify({ error: err.message }) }

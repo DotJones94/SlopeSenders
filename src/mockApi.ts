@@ -69,8 +69,8 @@ function getInitialMockDb(): MockDb {
     nextMetricId: 5000,
     users: defaultUsers,
     nominees: [
-      { id: 1, categoryId: getCategoryId('bests-dressed'), nomineeUserId: 5, nominatedByUserId: 1 },
-      { id: 2, categoryId: getCategoryId('bests-dressed'), nomineeUserId: 8, nominatedByUserId: 6 },
+      { id: 1, categoryId: getCategoryId('bests-improved'), nomineeUserId: 5, nominatedByUserId: 1 },
+      { id: 2, categoryId: getCategoryId('bests-improved'), nomineeUserId: 8, nominatedByUserId: 6 },
       { id: 3, categoryId: getCategoryId('predictions-hit-a-tree'), nomineeUserId: 4, nominatedByUserId: 2 },
       { id: 4, categoryId: getCategoryId('predictions-improve'), nomineeUserId: 3, nominatedByUserId: 7 },
     ],
@@ -158,7 +158,10 @@ export async function getMockUsers(): Promise<User[]> {
   return [...getState().users].sort((a, b) => a.name.localeCompare(b.name))
 }
 
-export async function getMockNomineesBySlug(slug: string): Promise<CategoryPayload> {
+export async function getMockNomineesBySlug(
+  slug: string,
+  voterUserId?: number,
+): Promise<CategoryPayload> {
   const category = getCategoryBySlug(slug)
   const db = getState()
 
@@ -177,6 +180,15 @@ export async function getMockNomineesBySlug(slug: string): Promise<CategoryPaylo
   return {
     category: { id: category.id, name: category.name, slug: category.slug },
     nominees,
+    currentUserVoteNomineeId:
+      voterUserId != null
+        ? db.votes.find((voteEntry) => {
+            if (voteEntry.voterUserId !== voterUserId) return false
+
+            const nomineeEntry = db.nominees.find((entry) => entry.id === voteEntry.nomineeId)
+            return nomineeEntry?.categoryId === category.id
+          })?.nomineeId ?? null
+        : null,
   }
 }
 
@@ -243,7 +255,10 @@ export async function voteMock(nomineeId: number, voterUserId: number) {
   if (nominee.nomineeUserId === voterUserId) throw new Error('You cannot vote for yourself.')
 
   const duplicate = db.votes.some(
-    (entry) => entry.nomineeId === nomineeId && entry.voterUserId === voterUserId,
+    (entry) =>
+      entry.voterUserId === voterUserId &&
+      db.nominees.find((nomineeEntry) => nomineeEntry.id === entry.nomineeId)?.categoryId ===
+        nominee.categoryId,
   )
 
   if (!duplicate) {

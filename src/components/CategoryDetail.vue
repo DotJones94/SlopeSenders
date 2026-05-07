@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, computed, watch, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   getMetricsBySlug,
@@ -11,6 +11,7 @@ import {
 import type { MetricEntry, MetricPayload } from '@/api'
 import { baseCategories } from '@/data/categories'
 import { useSessionUserStore } from '@/stores/sessionUser'
+import { BESTS_VOTES_UPDATED_EVENT } from '@/utils/bests'
 import {
   dispatchMetricsUpdatedEvent,
   getCategorySlug,
@@ -47,6 +48,7 @@ type Nominee = {
 type CategoryPayload = {
   category: { id: number; name: string; slug: string }
   nominees: Nominee[]
+  currentUserVoteNomineeId: number | null
 }
 
 const categoryData = ref<CategoryPayload | null>(null)
@@ -71,6 +73,7 @@ const tile = computed(() => {
 })
 
 const isMetricsCategory = computed(() => tile.value?.category.id === 'metrics')
+const currentUserVoteNomineeId = computed(() => categoryData.value?.currentUserVoteNomineeId ?? null)
 
 const availableNomineeUsers = computed(() =>
   sessionUser.users.filter(
@@ -145,7 +148,7 @@ async function load() {
         ? String(currentUserMetricEntry.value.value)
         : ''
     } else {
-      const data = await getNomineesBySlug(slug.value)
+      const data = await getNomineesBySlug(slug.value, sessionUser.currentUserId)
 
       if (!data?.category || !Array.isArray(data?.nominees)) {
         throw new Error('Unexpected API response')
@@ -224,7 +227,13 @@ async function castVote(nomineeId: number) {
 function voteLabel(nominee: Nominee) {
   if (votingId.value === nominee.id) return 'Voting...'
   if (nominee.nomineeUserId === sessionUser.currentUserId) return 'Your nomination'
+  if (currentUserVoteNomineeId.value === nominee.id) return 'Voted'
+  if (currentUserVoteNomineeId.value) return 'Already voted'
   return 'Vote'
+}
+
+function handleCategoryDataUpdated() {
+  load()
 }
 
 watch(
@@ -250,6 +259,11 @@ watch(currentUserMetricEntry, (entry) => {
 onMounted(async () => {
   await sessionUser.loadUsers()
   await load()
+  window.addEventListener(BESTS_VOTES_UPDATED_EVENT, handleCategoryDataUpdated)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener(BESTS_VOTES_UPDATED_EVENT, handleCategoryDataUpdated)
 })
 
 function openExpandedProfile() {
@@ -476,6 +490,13 @@ function openProfilePopup(name: string) {
           You can nominate yourself or someone else, but each rider can only appear once per
           category.
         </p>
+
+        <p
+          v-if="currentUserVoteNomineeId"
+          class="mt-3 rounded-2xl border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm text-cyan-900"
+        >
+          Your vote for this category has already been locked in.
+        </p>
       </div>
 
       <div
@@ -654,11 +675,15 @@ function openProfilePopup(name: string) {
                 :class="
                   nominee.nomineeUserId === sessionUser.currentUserId
                     ? 'cursor-not-allowed bg-slate-200 text-slate-500'
+                    : currentUserVoteNomineeId
+                      ? 'cursor-not-allowed bg-slate-200 text-slate-500'
                     : 'bg-slate-950 text-white hover:bg-slate-800'
                 "
                 @click="castVote(nominee.id)"
                 :disabled="
-                  votingId === nominee.id || nominee.nomineeUserId === sessionUser.currentUserId
+                  votingId === nominee.id ||
+                  nominee.nomineeUserId === sessionUser.currentUserId ||
+                  !!currentUserVoteNomineeId
                 "
               >
                 {{ voteLabel(nominee) }}
@@ -724,11 +749,15 @@ function openProfilePopup(name: string) {
               :class="
                 nominee.nomineeUserId === sessionUser.currentUserId
                   ? 'cursor-not-allowed bg-slate-200 text-slate-500'
+                  : currentUserVoteNomineeId
+                    ? 'cursor-not-allowed bg-slate-200 text-slate-500'
                   : 'bg-slate-950 text-white hover:bg-slate-800'
               "
               @click="castVote(nominee.id)"
               :disabled="
-                votingId === nominee.id || nominee.nomineeUserId === sessionUser.currentUserId
+                votingId === nominee.id ||
+                nominee.nomineeUserId === sessionUser.currentUserId ||
+                !!currentUserVoteNomineeId
               "
             >
               {{ voteLabel(nominee) }}

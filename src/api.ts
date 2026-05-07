@@ -21,6 +21,7 @@ export interface Nominee {
 export interface CategoryPayload {
   category: Category
   nominees: Nominee[]
+  currentUserVoteNomineeId: number | null
 }
 
 export interface MetricEntry {
@@ -88,12 +89,20 @@ export async function getUsers(): Promise<User[]> {
   return request('/.netlify/functions/users')
 }
 
-export async function getNomineesBySlug(slug: string): Promise<CategoryPayload> {
+export async function getNomineesBySlug(
+  slug: string,
+  voterUserId?: number | null,
+): Promise<CategoryPayload> {
   if (USE_FAKE_DATA) {
-    return getMockNomineesBySlug(slug)
+    return getMockNomineesBySlug(slug, voterUserId ?? undefined)
   }
 
-  return request(`/.netlify/functions/nominees-by-slug?slug=${encodeURIComponent(slug)}`)
+  const params = new URLSearchParams({ slug })
+  if (voterUserId) {
+    params.set('voterUserId', String(voterUserId))
+  }
+
+  return request(`/.netlify/functions/nominees-by-slug?${params.toString()}`)
 }
 
 export async function getMetricsBySlug(slug: string): Promise<MetricPayload> {

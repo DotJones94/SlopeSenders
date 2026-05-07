@@ -20,10 +20,13 @@ export const handler = async () => {
 
     // Flatten tiles into DB "categories"
     const rowsToUpsert = []
+    const slugsBySection = new Map()
     for (const section of baseCategories) {
+      const sectionSlugs = []
       for (const tile of section.tiles) {
         // stable slug based on section + tile title
         const slug = `${slugify(section.id)}-${slugify(tile.title)}`
+        sectionSlugs.push(slug)
         rowsToUpsert.push({
           slug,
           section: section.id,
@@ -31,22 +34,45 @@ export const handler = async () => {
           description: tile.description,
         })
       }
+
+      slugsBySection.set(section.id, sectionSlugs)
     }
 
-    // Upsert all
-    for (const r of rowsToUpsert) {
-      await pool.query(
-        `
-        INSERT INTO categories (slug, section, name, description)
-        VALUES ($1, $2, $3, $4)
-        ON CONFLICT (slug)
-        DO UPDATE SET
-          section = EXCLUDED.section,
-          name = EXCLUDED.name,
-          description = EXCLUDED.description
-        `,
-        [r.slug, r.section, r.name, r.description],
-      )
+    await pool.query('BEGIN')
+
+    try {
+      // Upsert all current categories
+      for (const r of rowsToUpsert) {
+        await pool.query(
+          `
+          INSERT INTO categories (slug, section, name, description)
+          VALUES ($1, $2, $3, $4)
+          ON CONFLICT (slug)
+          DO UPDATE SET
+            section = EXCLUDED.section,
+            name = EXCLUDED.name,
+            description = EXCLUDED.description
+          `,
+          [r.slug, r.section, r.name, r.description],
+        )
+      }
+
+      // Remove stale rows when category titles were renamed.
+      for (const [section, slugs] of slugsBySection.entries()) {
+        await pool.query(
+          `
+          DELETE FROM categories
+          WHERE section = $1
+            AND NOT (slug = ANY($2::text[]))
+          `,
+          [section, slugs],
+        )
+      }
+
+      await pool.query('COMMIT')
+    } catch (error) {
+      await pool.query('ROLLBACK')
+      throw error
     }
 
     // Return mapping so frontend can use it
