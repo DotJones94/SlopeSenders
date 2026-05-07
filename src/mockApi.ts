@@ -1,5 +1,5 @@
 import { baseCategories } from '@/data/categories'
-import type { Category, CategoryPayload, MetricPayload, Nominee, User } from '@/api'
+import type { Category, CategoryPayload, IckEntry, MetricPayload, Nominee, User } from '@/api'
 
 const STORAGE_KEY = 'slopesenders.mockDb'
 
@@ -26,10 +26,12 @@ type MockVoteEntry = {
 type MockDb = {
   nextNomineeId: number
   nextMetricId: number
+  nextIckId: number
   users: User[]
   nominees: MockNomineeEntry[]
   votes: MockVoteEntry[]
   metricEntries: MockMetricEntry[]
+  icks: IckEntry[]
 }
 
 function slugify(str: string) {
@@ -67,12 +69,33 @@ function getInitialMockDb(): MockDb {
   return {
     nextNomineeId: 1000,
     nextMetricId: 5000,
+    nextIckId: 8000,
     users: defaultUsers,
     nominees: [
-      { id: 1, categoryId: getCategoryId('bests-improved'), nomineeUserId: 5, nominatedByUserId: 1 },
-      { id: 2, categoryId: getCategoryId('bests-improved'), nomineeUserId: 8, nominatedByUserId: 6 },
-      { id: 3, categoryId: getCategoryId('predictions-hit-a-tree'), nomineeUserId: 4, nominatedByUserId: 2 },
-      { id: 4, categoryId: getCategoryId('predictions-improve'), nomineeUserId: 3, nominatedByUserId: 7 },
+      {
+        id: 1,
+        categoryId: getCategoryId('bests-improved'),
+        nomineeUserId: 5,
+        nominatedByUserId: 1,
+      },
+      {
+        id: 2,
+        categoryId: getCategoryId('bests-improved'),
+        nomineeUserId: 8,
+        nominatedByUserId: 6,
+      },
+      {
+        id: 3,
+        categoryId: getCategoryId('predictions-hit-a-tree'),
+        nomineeUserId: 4,
+        nominatedByUserId: 2,
+      },
+      {
+        id: 4,
+        categoryId: getCategoryId('predictions-improve'),
+        nomineeUserId: 3,
+        nominatedByUserId: 7,
+      },
     ],
     votes: [
       { nomineeId: 1, voterUserId: 2 },
@@ -81,14 +104,73 @@ function getInitialMockDb(): MockDb {
       { nomineeId: 3, voterUserId: 1 },
     ],
     metricEntries: [
-      { id: 1, categoryId: getCategoryId('metrics-vertical-meters'), userId: 1, value: 18642, updatedAt: isoDate(-8) },
-      { id: 2, categoryId: getCategoryId('metrics-vertical-meters'), userId: 6, value: 17410, updatedAt: isoDate(-6) },
-      { id: 3, categoryId: getCategoryId('metrics-overall-runs'), userId: 3, value: 121, updatedAt: isoDate(-4) },
-      { id: 4, categoryId: getCategoryId('metrics-overall-runs'), userId: 8, value: 118, updatedAt: isoDate(-3) },
-      { id: 5, categoryId: getCategoryId('metrics-days-on-the-slopes'), userId: 5, value: 19, updatedAt: isoDate(-7) },
-      { id: 6, categoryId: getCategoryId('metrics-days-on-the-slopes'), userId: 2, value: 17, updatedAt: isoDate(-2) },
-      { id: 7, categoryId: getCategoryId('metrics-different-resorts'), userId: 7, value: 6, updatedAt: isoDate(-9) },
-      { id: 8, categoryId: getCategoryId('metrics-top-speed'), userId: 1, value: 78.5, updatedAt: isoDate(-1) },
+      {
+        id: 1,
+        categoryId: getCategoryId('metrics-vertical-meters'),
+        userId: 1,
+        value: 18642,
+        updatedAt: isoDate(-8),
+      },
+      {
+        id: 2,
+        categoryId: getCategoryId('metrics-vertical-meters'),
+        userId: 6,
+        value: 17410,
+        updatedAt: isoDate(-6),
+      },
+      {
+        id: 3,
+        categoryId: getCategoryId('metrics-overall-runs'),
+        userId: 3,
+        value: 121,
+        updatedAt: isoDate(-4),
+      },
+      {
+        id: 4,
+        categoryId: getCategoryId('metrics-overall-runs'),
+        userId: 8,
+        value: 118,
+        updatedAt: isoDate(-3),
+      },
+      {
+        id: 5,
+        categoryId: getCategoryId('metrics-days-on-the-slopes'),
+        userId: 5,
+        value: 19,
+        updatedAt: isoDate(-7),
+      },
+      {
+        id: 6,
+        categoryId: getCategoryId('metrics-days-on-the-slopes'),
+        userId: 2,
+        value: 17,
+        updatedAt: isoDate(-2),
+      },
+      {
+        id: 7,
+        categoryId: getCategoryId('metrics-different-resorts'),
+        userId: 7,
+        value: 6,
+        updatedAt: isoDate(-9),
+      },
+      {
+        id: 8,
+        categoryId: getCategoryId('metrics-top-speed'),
+        userId: 1,
+        value: 78.5,
+        updatedAt: isoDate(-1),
+      },
+    ],
+    icks: [
+      {
+        id: 1,
+        targetUserId: 4,
+        targetUserName: 'Big Mike',
+        authorUserId: 1,
+        authorUserName: 'Kelly',
+        text: 'Left the group chat on read and still claimed first chair energy all weekend.',
+        createdAt: isoDate(-5),
+      },
     ],
   }
 }
@@ -125,11 +207,19 @@ function writeStorage(db: MockDb) {
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(db))
 }
 
+function normalizeState(db: MockDb): MockDb {
+  return {
+    ...db,
+    nextIckId: db.nextIckId ?? 8000,
+    icks: Array.isArray(db.icks) ? db.icks : [],
+  }
+}
+
 let state: MockDb | null = null
 
 function getState() {
   if (!state) {
-    state = readStorage() ?? getInitialMockDb()
+    state = normalizeState(readStorage() ?? getInitialMockDb())
     writeStorage(state)
   }
 
@@ -182,12 +272,12 @@ export async function getMockNomineesBySlug(
     nominees,
     currentUserVoteNomineeId:
       voterUserId != null
-        ? db.votes.find((voteEntry) => {
+        ? (db.votes.find((voteEntry) => {
             if (voteEntry.voterUserId !== voterUserId) return false
 
             const nomineeEntry = db.nominees.find((entry) => entry.id === voteEntry.nomineeId)
             return nomineeEntry?.categoryId === category.id
-          })?.nomineeId ?? null
+          })?.nomineeId ?? null)
         : null,
   }
 }
@@ -210,7 +300,12 @@ export async function getMockMetricsBySlug(slug: string): Promise<MetricPayload>
         updatedAt: existingEntry?.updatedAt ?? null,
       }
     })
-    .sort((a, b) => b.value - a.value || (a.updatedAt ?? '').localeCompare(b.updatedAt ?? '') || a.userName.localeCompare(b.userName))
+    .sort(
+      (a, b) =>
+        b.value - a.value ||
+        (a.updatedAt ?? '').localeCompare(b.updatedAt ?? '') ||
+        a.userName.localeCompare(b.userName),
+    )
 
   return {
     category: { id: category.id, name: category.name, slug: category.slug },
@@ -218,7 +313,11 @@ export async function getMockMetricsBySlug(slug: string): Promise<MetricPayload>
   }
 }
 
-export async function nominateMockBySlug(slug: string, nomineeUserId: number, nominatedByUserId: number) {
+export async function nominateMockBySlug(
+  slug: string,
+  nomineeUserId: number,
+  nominatedByUserId: number,
+) {
   const category = getCategoryBySlug(slug)
   const db = getState()
 
@@ -297,4 +396,61 @@ export async function upsertMockMetricBySlug(slug: string, userId: number, value
   writeStorage(db)
 
   return { id, value, updatedAt }
+}
+
+export async function getMockIcks(authorUserId?: number): Promise<IckEntry[]> {
+  const db = getState()
+  const entries = authorUserId
+    ? db.icks.filter((entry) => entry.authorUserId === authorUserId)
+    : db.icks
+
+  return [...entries].sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+}
+
+export async function createMockIck(targetUserId: number, authorUserId: number, text: string) {
+  const db = getState()
+  const trimmedText = text.trim()
+
+  if (!trimmedText) {
+    throw new Error('Please add an ick before saving.')
+  }
+
+  const targetUser = db.users.find((user) => user.id === targetUserId)
+  if (!targetUser) {
+    throw new Error('Selected rider not found.')
+  }
+
+  const authorUser = db.users.find((user) => user.id === authorUserId)
+  if (!authorUser) {
+    throw new Error('Current rider not found.')
+  }
+
+  const entry: IckEntry = {
+    id: db.nextIckId++,
+    targetUserId,
+    targetUserName: targetUser.name,
+    authorUserId,
+    authorUserName: authorUser.name,
+    text: trimmedText,
+    createdAt: new Date().toISOString(),
+  }
+
+  db.icks.push(entry)
+  writeStorage(db)
+
+  return entry
+}
+
+export async function deleteMockIck(id: number, authorUserId: number) {
+  const db = getState()
+  const index = db.icks.findIndex((entry) => entry.id === id && entry.authorUserId === authorUserId)
+
+  if (index === -1) {
+    throw new Error('Ick not found.')
+  }
+
+  db.icks.splice(index, 1)
+  writeStorage(db)
+
+  return { id }
 }

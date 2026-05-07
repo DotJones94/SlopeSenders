@@ -37,6 +37,16 @@ export interface MetricPayload {
   entries: MetricEntry[]
 }
 
+export interface IckEntry {
+  id: number
+  targetUserId: number
+  targetUserName: string
+  authorUserId: number
+  authorUserName: string
+  text: string
+  createdAt: string
+}
+
 import {
   getMockCategories,
   getMockMetricsBySlug,
@@ -45,6 +55,9 @@ import {
   nominateMockBySlug,
   upsertMockMetricBySlug,
   voteMock,
+  createMockIck,
+  deleteMockIck,
+  getMockIcks,
 } from '@/mockApi'
 
 const USE_FAKE_DATA = import.meta.env.VITE_USE_FAKE_DATA === 'true'
@@ -157,5 +170,47 @@ export async function upsertMetricBySlug(
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ slug, userId, value }),
+  })
+}
+
+export async function getIcks(authorUserId?: number | null): Promise<IckEntry[]> {
+  if (USE_FAKE_DATA) {
+    return getMockIcks(authorUserId ?? undefined)
+  }
+
+  const params = new URLSearchParams()
+  if (authorUserId) {
+    params.set('authorUserId', String(authorUserId))
+  }
+
+  const query = params.toString()
+  return request(`/.netlify/functions/icks${query ? `?${query}` : ''}`)
+}
+
+export async function createIck(
+  targetUserId: number,
+  authorUserId: number,
+  text: string,
+): Promise<IckEntry> {
+  if (USE_FAKE_DATA) {
+    return createMockIck(targetUserId, authorUserId, text)
+  }
+
+  return request('/.netlify/functions/create-ick', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ targetUserId, authorUserId, text }),
+  })
+}
+
+export async function deleteIck(id: number, authorUserId: number): Promise<{ id: number }> {
+  if (USE_FAKE_DATA) {
+    return deleteMockIck(id, authorUserId)
+  }
+
+  return request('/.netlify/functions/delete-ick', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ id, authorUserId }),
   })
 }
