@@ -4,6 +4,8 @@ export const METRICS_UPDATED_EVENT = 'slopesenders:metrics-updated'
 
 export function slugifyMetricValue(str: string) {
   return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
     .trim()
     .replace(/['"]/g, '')

@@ -1,4 +1,5 @@
 import { getPool } from './_db.js'
+import { resolveCategoryBySlug } from './_categories.js'
 
 export const handler = async (event) => {
   try {
@@ -9,8 +10,7 @@ export const handler = async (event) => {
 
     const pool = getPool()
 
-    const catRes = await pool.query(`SELECT id, name, slug FROM categories WHERE slug = $1`, [slug])
-    const category = catRes.rows[0]
+    const category = await resolveCategoryBySlug(pool, slug)
 
     if (!category) {
       return { statusCode: 404, body: JSON.stringify({ error: 'category not found' }) }

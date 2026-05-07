@@ -1,8 +1,10 @@
 import { getPool } from './_db.js'
+import { syncCategories } from './_categories.js'
 
 export const handler = async () => {
   try {
     const pool = getPool()
+    await syncCategories(pool)
     const { rows } = await pool.query(`SELECT id, slug FROM categories`)
     return {
       statusCode: 200,
