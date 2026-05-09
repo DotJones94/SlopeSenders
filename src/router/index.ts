@@ -33,6 +33,11 @@ const router = createRouter({
       component: () => import('@/views/Home.vue'),
     },
     {
+      path: '/tally',
+      name: 'tally',
+      component: () => import('@/views/TallyBoard.vue'),
+    },
+    {
       path: '/category/:slug',
       name: 'category',
       component: () => import('@/components/CategoryDetail.vue'),

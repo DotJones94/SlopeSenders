@@ -1,4 +1,6 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { RouterLink } from 'vue-router'
+</script>
 
 <template>
   <section
@@ -12,6 +14,20 @@
       <p class="text-lg leading-relaxed text-copy-muted">
         Even if you ate more snow than you skied.
       </p>
+      <div class="flex flex-wrap justify-center gap-3 pt-6">
+        <RouterLink
+          to="/stats"
+          class="rounded-full bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-200"
+        >
+          Open personal stats
+        </RouterLink>
+        <RouterLink
+          to="/tally"
+          class="rounded-full border border-white/15 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/30 hover:bg-white/5"
+        >
+          View season tallies
+        </RouterLink>
+      </div>
     </div>
   </section>
 </template>

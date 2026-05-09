@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue'
+import { RouterLink } from 'vue-router'
 import {
   createIck,
   deleteIck,
@@ -64,6 +65,7 @@ const topMetric = computed(() => {
 
 const leaderboardReleaseLabel = 'Released on Sun'
 const hasIcks = computed(() => icks.value.length > 0)
+const canViewTallies = computed(() => sessionUser.currentUser?.name === 'Kelly')
 const completedBestVotes = computed(
   () => bestVotes.value.filter((category) => category.currentUserVoteName).length,
 )
@@ -410,6 +412,31 @@ onBeforeUnmount(() => {
               </span>
               <span>{{ item.label }}</span>
             </a>
+            <RouterLink
+              v-if="canViewTallies"
+              to="/tally"
+              class="inline-flex items-center gap-3 rounded-full border border-white/10 bg-slate-950/35 px-4 py-2.5 text-sm font-medium text-slate-100 transition hover:border-cyan-300/40 hover:bg-cyan-300/10 hover:text-white"
+            >
+              <span
+                class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-cyan-200"
+              >
+                <svg
+                  class="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                </svg>
+              </span>
+              <span>Tallies</span>
+            </RouterLink>
           </nav>
 
           <div
